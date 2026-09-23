@@ -1,17 +1,15 @@
 stack: dotnet
-install_cmd: cd src/EventApi && dotnet add package Microsoft.EntityFrameworkCore &&
-  dotnet add package Microsoft.EntityFrameworkCore.Sqlite && dotnet add package Microsoft.EntityFrameworkCore.InMemory
+install_cmd: dotnet add package Microsoft.EntityFrameworkCore && dotnet add package
+  Microsoft.EntityFrameworkCore.Sqlite && dotnet add package Microsoft.EntityFrameworkCore.InMemory
   && dotnet add package xunit && dotnet add package Microsoft.AspNetCore.Mvc.Testing
   && dotnet restore
-syntax_cmd: cd src/EventApi && for p in $(find . -name '*.csproj' ! -iname '*test*.csproj');
-  do dotnet build "$p" --no-restore -nologo -v q -clp:ErrorsOnly || exit 1; done
-build_cmd: cd src/EventApi && for p in $(find . -name '*.csproj' ! -iname '*test*.csproj');
-  do dotnet build "$p" --no-restore -nologo -v q || exit 1; done
-test_cmd: cd src/EventApi && rm -rf .propel/tr; dotnet test --no-restore -nologo --logger
-  "trx;LogFileName=r.trx" --results-directory .propel/tr; cat .propel/tr/r.trx
-test_selector: cd src/EventApi && rm -rf .propel/tr; dotnet test --no-restore -nologo
-  --logger "trx;LogFileName=r.trx" --results-directory .propel/tr --filter "{path}";
-  cat .propel/tr/r.trx
+syntax_cmd: for p in $(find . -name '*.csproj' ! -iname '*test*.csproj'); do dotnet
+  build "$p" --no-restore -nologo -v q -clp:ErrorsOnly || exit 1; done
+build_cmd: for p in $(find . -name '*.csproj' ! -iname '*test*.csproj'); do dotnet
+  build "$p" --no-restore -nologo -v q || exit 1; done
+test_cmd: rm -rf .propel/tr; dotnet test --no-restore -nologo --logger "trx;LogFileName=r.trx"
+  --results-directory .propel/tr; cat .propel/tr/r.trx
+test_selector: rm -rf .propel/tr; dotnet test --no-restore -nologo --logger "trx;LogFileName=r.trx"
+  --results-directory .propel/tr --filter "{path}"; cat .propel/tr/r.trx
 dependency_file: packages.lock.json
 runtime_version: '8.0'
-project_dir: src/EventApi
