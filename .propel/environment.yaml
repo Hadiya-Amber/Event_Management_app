@@ -1,0 +1,30 @@
+stack: dotnet
+install_cmd: cd src/EventApi && dotnet add "$(find . -name '*.csproj' ! -iname '*test*.csproj'
+  ! -path '*/obj/*' ! -path '*/bin/*' | sort | head -1)" package Microsoft.EntityFrameworkCore
+  --version "8.*" && dotnet add "$(find . -name '*.csproj' ! -iname '*test*.csproj'
+  ! -path '*/obj/*' ! -path '*/bin/*' | sort | head -1)" package Microsoft.EntityFrameworkCore.Sqlite
+  --version "8.*" && dotnet add "$(find . -name '*.csproj' ! -iname '*test*.csproj'
+  ! -path '*/obj/*' ! -path '*/bin/*' | sort | head -1)" package Microsoft.EntityFrameworkCore.InMemory
+  --version "8.*" && dotnet add "$(find . -name '*.csproj' ! -iname '*test*.csproj'
+  ! -path '*/obj/*' ! -path '*/bin/*' | sort | head -1)" package Microsoft.AspNetCore.Mvc.Testing
+  --version "8.*" && dotnet add "$(find . -name '*.csproj' ! -iname '*test*.csproj'
+  ! -path '*/obj/*' ! -path '*/bin/*' | sort | head -1)" package xunit && for p in
+  $(find . -name '*.csproj' ! -path '*/obj/*' ! -path '*/bin/*' | sort); do dotnet
+  restore "$p" || exit 1; done
+syntax_cmd: cd src/EventApi && for p in $(find . -name '*.csproj' ! -iname '*test*.csproj'
+  ! -path '*/obj/*' ! -path '*/bin/*' | sort); do dotnet build "$p" -nologo -v q -clp:ErrorsOnly
+  || exit 1; done
+build_cmd: cd src/EventApi && for p in $(find . -name '*.csproj' ! -iname '*test*.csproj'
+  ! -path '*/obj/*' ! -path '*/bin/*' | sort); do dotnet build "$p" -nologo -v q ||
+  exit 1; done
+test_cmd: cd src/EventApi && rm -rf .propel/tr; for p in $(find . -iname '*test*.csproj'
+  ! -path '*/obj/*' ! -path '*/bin/*' | sort); do dotnet test "$p" -nologo --logger
+  "trx;LogFileName=$(basename "$p" .csproj).trx" --results-directory .propel/tr; done;
+  cat .propel/tr/*.trx 2>/dev/null
+test_selector: cd src/EventApi && rm -rf .propel/tr; for p in $(find . -iname '*test*.csproj'
+  ! -path '*/obj/*' ! -path '*/bin/*' | sort); do dotnet test "$p" -nologo --logger
+  "trx;LogFileName=$(basename "$p" .csproj).trx" --results-directory .propel/tr --filter
+  "{path}"; done; cat .propel/tr/*.trx 2>/dev/null
+dependency_file: packages.lock.json
+runtime_version: '8.0'
+project_dir: src/EventApi
