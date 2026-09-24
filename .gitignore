@@ -6,3 +6,5 @@ obj/
 *.db
 *.sqlite
 .idea/
+*.db-shm
+*.db-wal
