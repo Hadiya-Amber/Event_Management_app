@@ -13,6 +13,15 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connect
 
 var app = builder.Build();
 
+// Bring the database up to the checked-in migrations once, at startup, so the
+// SQLite file exists before the first request and a migration failure stops
+// the app loudly instead of surfacing later as a missing table.
+using (var scope = app.Services.CreateScope())
+{
+    scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
+}
+
+
 app.MapGet("/health", () => Results.Text("Healthy"));
 
 app.Run();
