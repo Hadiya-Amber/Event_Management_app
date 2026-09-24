@@ -8,20 +8,15 @@ namespace EventApi.Data
     /// </summary>
     public class AppDbContext : DbContext
     {
+                /// <summary>
+        /// Creates the context. Migrations are applied once at startup
+        /// (Program.cs), not here: a constructor runs for every context the
+        /// container creates, and a migration failure must not be swallowed.
+        /// </summary>
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
-            // If migrations are not applied for some reason in the test environment, create the table schema
-            // so tests that expect persistence still function. Use ExecuteSqlRaw which works with relational providers.
-            try
-            {
-                // Apply any pending migrations so the database schema matches the checked-in migrations.
-                Database.Migrate();
-            }
-            catch
-            {
-                // Swallow: if migrations cannot be applied in this environment, tests that rely on migrations may fail.
-            }
         }
+
 
         public DbSet<Event> Events { get; set; } = null!;
 
