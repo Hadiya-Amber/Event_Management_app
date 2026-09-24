@@ -11,6 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=eventapi.db";
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
 
+// Register controllers so MVC controllers are available to the test host
+builder.Services.AddControllers();
+
 var app = builder.Build();
 
 // Bring the database up to the checked-in migrations once, at startup, so the
@@ -18,11 +21,20 @@ var app = builder.Build();
 // the app loudly instead of surfacing later as a missing table.
 using (var scope = app.Services.CreateScope())
 {
-    scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    // Only apply migrations when using a relational provider. InMemory provider
+    // doesn't support migrations and is used by tests.
+    if (db.Database.IsRelational())
+    {
+        db.Database.Migrate();
+    }
 }
 
 
 app.MapGet("/health", () => Results.Text("Healthy"));
+
+// Map controller routes
+app.MapControllers();
 
 app.Run();
 
